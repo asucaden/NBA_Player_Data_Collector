@@ -1,2 +1,9 @@
+# package directories
 node_modules/
 config/
+package.json
+jspm_packages
+
+# Serverless directories
+.serverless
+serverless.yml

@@ -1,5 +1,5 @@
 const connectDB = require('./config/db');
-const { grabAllPlayers, dailyUpdatePlayers } = require('./grabBallDontLie');
+const { yearlyPlayerSync, dailyStatsUpdate } = require('./updateStats');
 
 connectDB();
-dailyUpdatePlayers();
+dailyStatsUpdate();
