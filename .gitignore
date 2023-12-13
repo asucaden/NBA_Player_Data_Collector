@@ -7,3 +7,7 @@ jspm_packages
 # Serverless directories
 .serverless
 serverless.yml
+
+
+# Mac
+**/.DS_Store

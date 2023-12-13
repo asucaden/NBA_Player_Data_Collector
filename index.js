@@ -1,5 +1,9 @@
 const connectDB = require("./config/db");
 const { yearlyPlayerSync, dailyStatsUpdate } = require("./updateStats");
 
-connectDB();
-dailyStatsUpdate();
+let manualDailyUpdate = async () => {
+  await connectDB();
+  dailyStatsUpdate();
+};
+
+manualDailyUpdate();

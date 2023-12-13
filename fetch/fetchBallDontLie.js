@@ -32,12 +32,18 @@ const fetchCurrentSeasonData = async () => {
   const mongo_ids = mongo_players.map((m_p) => m_p.player_id);
   const bdl_stats = [];
   try {
-    url = new URL("https://www.balldontlie.io/api/v1/season_averages");
+    console.log(
+      "There are a total of ",
+      mongo_ids.length,
+      "players found who will be updated."
+    );
     while (mongo_ids.length > 0) {
+      url = new URL("https://www.balldontlie.io/api/v1/season_averages");
       const chunk_ids = mongo_ids.splice(0, 100);
       console.log(chunk_ids);
-      url.searchParams.set("player_ids[]", chunk_ids);
-
+      for (let i = 0; i < 100; i++) {
+        url.searchParams.append("player_ids[]", chunk_ids[i]);
+      }
       console.log("Fetching a page of season averages");
       console.log("URL: " + url);
       const res = await fetch(url);
