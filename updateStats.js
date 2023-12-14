@@ -26,6 +26,12 @@ const yearlyPlayerSync = async () => {
   });
 
   mongo_players.forEach((m_p) => {
+    if (!m_p.cm_fame) {
+      console.log(
+        `${m_p.cm_name} doesn't have a fame set. Setting fame to 1000.`
+      );
+      m_p.cm_fame = 1000;
+    }
     m_p.save();
   });
   console.log("All players updated");
