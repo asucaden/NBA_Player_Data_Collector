@@ -4,7 +4,7 @@ const mapBdlToModel = (bdlPlayer, mongoPlayer) => {
   mongoPlayer.pts = bdlPlayer.pts;
   mongoPlayer.reb = bdlPlayer.reb;
   mongoPlayer.ast = bdlPlayer.ast;
-  mongoPlayer.stl = bdlPlayer.season;
+  mongoPlayer.stl = bdlPlayer.stl;
   mongoPlayer.blk = bdlPlayer.blk;
   mongoPlayer.min = bdlPlayer.min;
   mongoPlayer.fgm = bdlPlayer.fgm;
