@@ -1,18 +1,18 @@
-const Player = require('./models/Player');
-const mapBdlToModel = require('./utils/mapBdlToModel');
+const Player = require("./models/Player");
+const mapBdlToModel = require("./utils/mapBdlToModel");
 const {
   fetchEveryPlayerEver,
   fetchCurrentSeasonData,
-} = require('./fetch/fetchBallDontLie');
+} = require("./fetch/fetchBallDontLie");
 
 // Called literally 1x per YEAR.
 // Map players to ids in a way that accounts for balldontlie api's quirkiness
 const yearlyPlayerSync = async () => {
-  console.log('Grabbing mongo players from db');
+  console.log("Grabbing mongo players from db");
   const mongo_players = await Player.find();
   const bdl_players = await fetchEveryPlayerEver();
 
-  console.log('Assigning bdl ids to mongo players');
+  console.log("Assigning bdl ids to mongo players");
   mongo_players.forEach((m_p) => {
     const bdl_match = bdl_players.find((b_p) => {
       return `${b_p.first_name} ${b_p.last_name}` === m_p.cm_name;
@@ -28,7 +28,7 @@ const yearlyPlayerSync = async () => {
   mongo_players.forEach((m_p) => {
     m_p.save();
   });
-  console.log('All players updated');
+  console.log("All players updated");
   return;
 };
 
@@ -51,9 +51,9 @@ const dailyStatsUpdate = async () => {
         );
       }
     });
-    console.log('All players updated');
+    console.log("All players updated");
   } else {
-    console.error('No players found');
+    console.error("No players found");
   }
   return;
 };
