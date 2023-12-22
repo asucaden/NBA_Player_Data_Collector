@@ -8,6 +8,8 @@ jspm_packages
 .serverless
 serverless.yml
 
+# AWS Zip deployment
+my_deployment_package.zip
 
 # Mac
 **/.DS_Store

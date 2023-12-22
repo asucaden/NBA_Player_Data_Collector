@@ -43,20 +43,22 @@ const dailyStatsUpdate = async () => {
   const { mongo_players, bdl_stats } = await fetchCurrentSeasonData();
 
   if (bdl_stats) {
-    mongo_players.forEach((m_p) => {
-      const bdl_stat_match = bdl_stats.find((b_p) => {
-        return b_p.player_id === m_p.player_id;
-      });
-      if (bdl_stat_match) {
-        mapBdlToModel(bdl_stat_match, m_p);
-        m_p.save();
-        console.log(`saved player ${m_p.cm_name} successfully`);
-      } else {
-        console.error(
-          `\nNo match found for a mongo player ID. Player was ${m_p.cm_name}\n`
-        );
-      }
-    });
+    await Promise.all(
+      mongo_players.map(async (m_p) => {
+        const bdl_stat_match = bdl_stats.find((b_p) => {
+          return b_p.player_id === m_p.player_id;
+        });
+        if (bdl_stat_match) {
+          mapBdlToModel(bdl_stat_match, m_p);
+          await m_p.save();
+          console.log(`saved player ${m_p.cm_name} successfully`);
+        } else {
+          console.error(
+            `\nNo match found for a mongo player ID. Player was ${m_p.cm_name}\n`
+          );
+        }
+      })
+    );
     console.log("All players updated");
   } else {
     console.error("No players found");
