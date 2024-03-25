@@ -70,7 +70,7 @@ const fetchCurrentSeasonData = async () => {
         console.log(`Batch #${batchNum}: Received response`);
         const resJson = await res.json();
         console.log(
-          `Batch#${batchNum}: Finished processing json, returning promise`
+          `Batch #${batchNum}: Finished processing json, returning promise`
         );
         return resJson;
       })
