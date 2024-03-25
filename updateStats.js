@@ -4,6 +4,7 @@ const {
   fetchEveryPlayerEver,
   fetchCurrentSeasonData,
 } = require("./fetch/fetchBallDontLie");
+const { mongo } = require("mongoose");
 
 // Called literally 1x per YEAR.
 // Map players to ids in a way that accounts for balldontlie api's quirkiness
@@ -41,29 +42,34 @@ const yearlyPlayerSync = async () => {
 // Fetch BallDontLie stats, assign stats to the mongo players
 const dailyStatsUpdate = async () => {
   const { mongo_players, bdl_stats } = await fetchCurrentSeasonData();
-
   if (bdl_stats) {
+    let playerNum = 0;
     await Promise.all(
-      mongo_players.map(async (m_p) => {
-        const bdl_stat_match = bdl_stats.find((b_p) => {
-          return b_p.player_id === m_p.player_id;
-        });
+      mongo_players.map((mongo_player) => {
+        const playerCount = ++playerNum;
+        const bdl_stat_match = bdl_stats.find(
+          (bdl_player) => bdl_player.player_id === mongo_player.player_id
+        );
         if (bdl_stat_match) {
-          mapBdlToModel(bdl_stat_match, m_p);
-          await m_p.save();
-          console.log(`saved player ${m_p.cm_name} successfully`);
+          mapBdlToModel(bdl_stat_match, mongo_player); // has side-effects - m_p is updated with bdl stats
+
+          return mongo_player
+            .save()
+            .then(() =>
+              console.log(
+                `${playerCount} - Successful save for: ${mongo_player.cm_name}`
+              )
+            );
         } else {
-          console.error(
-            `\nNo match found for a mongo player ID. Player was ${m_p.cm_name}\n`
-          );
+          console.error(`\nNo match found for ${mongo_player.cm_name}\n`);
         }
       })
     );
-    console.log("All players updated");
-  } else {
-    console.error("No players found");
+    console.log(
+      "If I wrote this correctly, shouldn't write to console until after all players are saved."
+    );
+    return;
   }
-  return;
 };
 
 module.exports = { yearlyPlayerSync, dailyStatsUpdate };

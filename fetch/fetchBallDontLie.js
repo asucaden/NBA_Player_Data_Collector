@@ -1,4 +1,7 @@
 const fetch = require("node-fetch");
+const config = require("config");
+const bdlKey = config.get("bdlKey");
+const nbaYear = config.get("nbaYear");
 
 const fetchEveryPlayerEver = async () => {
   let bdl_players = [];
@@ -26,55 +29,61 @@ const fetchEveryPlayerEver = async () => {
 };
 
 const fetchCurrentSeasonData = async () => {
-  // make request to bdl for those player's stats
-  console.log("Grabbing mongo players from db");
+  // make request to bdl-api for players' stats
+  console.log("Fetching Current Season Data...");
+
   const mongo_players = await Player.find();
   const mongo_ids = mongo_players.map((m_p) => m_p.player_id);
-  const bdl_stats = [];
+  console.log(
+    "There are a total of ",
+    mongo_ids.length,
+    "players found who will be updated."
+  );
+
   try {
-    console.log(
-      "There are a total of ",
-      mongo_ids.length,
-      "players found who will be updated."
-    );
-    while (mongo_ids.length > 0) {
-      url = new URL("https://www.balldontlie.io/api/v1/season_averages");
-      const chunk_ids = mongo_ids.splice(0, 100);
-      console.log(chunk_ids);
-      for (let i = 0; i < 100; i++) {
-        url.searchParams.append("player_ids[]", chunk_ids[i]);
-      }
-      console.log("Fetching a page of season averages");
-      console.log("URL: " + url);
-      const res = await fetch(url);
-      const json = await res.json();
-      console.log("JSON is " + json);
-      if (json.data.length === 0) {
-        console.log("Fetched all season averages");
-        console.log(
-          "Fetched all season averages, " +
-            mongo_players.length +
-            " total players fetched." +
-            bdl_stats +
-            "bdl players fetched."
-        );
-        return { mongo_players, bdl_stats };
-      }
-      console.log("Reading stats page");
-      bdl_stats.push(...json.data);
+    const urls = [];
+    while (mongo_ids.length) {
+      const batched_ids = mongo_ids.splice(0, 20);
+      const batch_url = new URL(
+        "https://api.balldontlie.io/v1/season_averages"
+      );
+      batch_url.searchParams.append("season", nbaYear);
+      batched_ids.forEach((id) => {
+        batch_url.searchParams.append("player_ids[]", id);
+      });
+      urls.push(batch_url);
     }
+    const headers = new Headers();
+    headers.append("Authorization", bdlKey);
+    const options = {
+      method: "GET",
+      headers: headers,
+    };
+
+    let urlCount = 0;
+    const bdl_stats = [];
+    const batched_stats = await Promise.all(
+      urls.map(async (url) => {
+        const batchNum = ++urlCount;
+        console.log(`Batch #${batchNum}: Beginning to fetch`);
+        const res = await fetch(url, options);
+        console.log(`Batch #${batchNum}: Received response`);
+        const resJson = await res.json();
+        console.log(
+          `Batch#${batchNum}: Finished processing json, returning promise`
+        );
+        return resJson;
+      })
+    );
+
+    batched_stats.forEach((batch) => {
+      bdl_stats.push(...batch.data);
+    });
+
+    return { mongo_players, bdl_stats };
   } catch (err) {
     console.error("Error fetching player data");
     throw err;
   } // Don't update the DB if there was an error fetching player data
-  console.log(
-    "Fetched all season averages, " +
-      mongo_players.length +
-      " total players fetched." +
-      bdl_stats.length +
-      "bdl players fetched."
-  );
-  return { mongo_players, bdl_stats };
 };
-
 module.exports = { fetchEveryPlayerEver, fetchCurrentSeasonData };

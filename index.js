@@ -4,6 +4,7 @@ const { yearlyPlayerSync, dailyStatsUpdate } = require("./updateStats");
 let manualDailyUpdate = async () => {
   await connectDB();
   await dailyStatsUpdate();
+  console.log("Daily Stats Update promise is returned");
 };
 
 manualDailyUpdate();
